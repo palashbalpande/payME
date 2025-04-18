@@ -9,7 +9,7 @@ export const validateSignUpSchema = (
   const validation = userSignUpSchema.safeParse(req.body);
   if (!validation.success) {
     res.status(400).json({
-      message: "Incorrect data format",
+      message: "Email taken OR Incorrect inputs",
       error: validation.error?.format(),
     });
   }

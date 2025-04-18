@@ -31,6 +31,10 @@ export const userMiddleware = async (
       token as string,
       JWT_USER_CODE
     )) as JwtPayload;
+    if (!decoded.id) {
+      res.status(403).json({ message: "Unauthorized user" });
+      return;
+    }
     req.userId = decoded.id;
     next();
   } catch (err) {

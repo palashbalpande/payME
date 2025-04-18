@@ -14,6 +14,11 @@ export const signUpUser = async (
   const hashedPassword = await bcrypt.hash(password, 8);
 
   try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      res.status(409).json({ message: "Email already exist" });
+      return;
+    }
     await User.create({
       firstName,
       lastName,
@@ -89,7 +94,7 @@ export const updateUser = async (
     if (email) {
       const existingUserEmail = await User.findOne({ email });
       if (existingUserEmail && existingUserEmail._id.toString() != userId) {
-        res.status(409).json({ message: "email already exist" });
+        res.status(409).json({ message: "Your updated email already exist" });
         return;
       }
       updates.email = email;
@@ -98,7 +103,7 @@ export const updateUser = async (
       const hashedPassword = await bcrypt.hash(password, 8);
       updates.password = hashedPassword;
     }
-    if ((Object.keys(updates).length === 0)) {
+    if (Object.keys(updates).length === 0) {
       res.status(200).json({ message: "No updates provided" });
       return;
     }
