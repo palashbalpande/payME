@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { User } from "../models/user";
 import { getJwtUserCode } from "../utils/getJwtUserCode";
 import jwt from "jsonwebtoken";
+import { Account } from "../models/account";
 
 export const signUpUser = async (
   req: Request,
@@ -19,12 +20,22 @@ export const signUpUser = async (
       res.status(409).json({ message: "Email already exist" });
       return;
     }
-    await User.create({
+    const user = await User.create({
       firstName,
       lastName,
       email,
       password: hashedPassword,
     });
+    const userId = user._id;
+    /// --------- Create new account ----------
+
+    await Account.create({
+      userId,
+      balance: 1 + Math.random() * 10000,
+    });
+
+    /// ---------------------------------------
+
     res.status(201).json({ message: "Signup succeded" });
     next();
   } catch (err) {
@@ -123,6 +134,56 @@ export const updateUser = async (
     console.error("Error updating user: ", err);
     res.status(500).json({
       message: "Failed to update user",
+      error: err instanceof Error ? err.message : "Unknown error",
+    });
+  }
+};
+
+export const findUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const filter = req.query.filter || "";
+    const loggedInUser = req.userId;
+
+    const users = await User.find({
+      $and: [
+        {
+          _id: { $ne: loggedInUser },
+        },
+        {
+          $or: [
+            {
+              firstName: {
+                $regex: filter,
+                $options: "i",
+              },
+            },
+            {
+              lastName: {
+                $regex: filter,
+                $options: "i",
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    res.json({
+      user: users.map((user) => ({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        _id: user._id,
+      })),
+    });
+  } catch (err) {
+    console.error("Error finding user: ", err);
+    res.status(500).json({
+      message: "Failed to fetch user",
       error: err instanceof Error ? err.message : "Unknown error",
     });
   }

@@ -2,13 +2,13 @@ import "dotenv/config.js";
 import express from "express";
 import cors from "cors";
 import { connectDB } from "./config/db";
-import { userRouter } from "./routes/user";
+import { indexRouter } from "./routes/indexRoute";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/v1/user", userRouter);
+app.use("/api/v1", indexRouter);
 
 const PORT = process.env.PORT || 8080;
 
