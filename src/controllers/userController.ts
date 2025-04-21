@@ -32,6 +32,7 @@ export const signUpUser = async (
     await Account.create({
       userId,
       balance: 0,
+      email,
     });
 
     /// ---------------------------------------

@@ -2,7 +2,8 @@ import mongoose, { model, Schema, Types } from "mongoose";
 
 interface IAccount {
     userId: Types.ObjectId,
-    balance: Number
+    balance: Number,
+    email: string
 }
 
 const accountSchema = new Schema<IAccount>({
@@ -15,6 +16,11 @@ const accountSchema = new Schema<IAccount>({
     type: Number,
     required: true,
   },
+  email: {
+    type: String,
+    ref: "User",
+    required: true,
+  }
 });
 
 export const Account = model<IAccount>("Account", accountSchema);
