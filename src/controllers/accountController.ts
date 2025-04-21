@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Account } from "../models/account";
 import { startSession } from "mongoose";
+import { number } from "zod";
 
 export const accountBalance = async (req: Request, res: Response) => {
   try {
@@ -66,5 +67,47 @@ export const transferMoney = async (req: Request, res: Response) => {
       message: "Failed to transfer money",
       error: err instanceof Error ? err.message : "Unknown error",
     });
+  }
+};
+
+export const depositMoney = async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId;
+    const { amount } = req.body;
+
+    if (typeof amount !== "number" || amount <= 0) {
+      res.status(400).json({
+        message: "Invalid amount",
+      });
+      return;
+    }
+
+    const account = await Account.findOneAndUpdate(
+      {
+        userId,
+      },
+      {
+        $inc: { balance: amount },
+      },
+      {
+        new: true,
+      }
+    );
+    if (!account) {
+      res.status(400).json({
+        message: "Accout not found for this user",
+      });
+      return;
+    }
+    res.status(200).json({
+      message: "Funds deposited successfully",
+      balance: account.balance,
+    });
+  } catch (err) {
+    console.error("Error depositing money: ", err),
+      res.status(500).json({
+        message: "Failed to deposite money",
+        error: err instanceof Error ? err.message : "Unknown error",
+      });
   }
 };

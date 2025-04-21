@@ -31,7 +31,7 @@ export const signUpUser = async (
 
     await Account.create({
       userId,
-      balance: 1 + Math.random() * 10000,
+      balance: 0,
     });
 
     /// ---------------------------------------
